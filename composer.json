@@ -1,5 +1,5 @@
 {
-    "name": "nrslib/clarc-core",
+    "name": "nrslib/clarc-php-core",
     "require": {
         "php": "^7.2",
         "nrslib/cfg": "^0.1.7"

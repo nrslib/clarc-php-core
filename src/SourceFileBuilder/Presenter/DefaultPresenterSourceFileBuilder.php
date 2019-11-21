@@ -8,6 +8,7 @@ use nrslib\Cfg\ClassRenderer;
 use nrslib\Cfg\Meta\Classes\ClassMeta;
 use nrslib\Cfg\Meta\Words\AccessLevel;
 use nrslib\Clarc\UseCases\Commons\Ds\SourceFileData;
+use nrslib\Clarc\UseCases\UseCase\Create\UseCaseSchema;
 
 class DefaultPresenterSourceFileBuilder implements PresenterSourceFileBuilderInterface
 {
@@ -25,9 +26,9 @@ class DefaultPresenterSourceFileBuilder implements PresenterSourceFileBuilderInt
         $this->renderer = $render;
     }
 
-    function build(string $aName, string $namespace, string $outputDataName, string $outputPortName, string $outputPortNamespace): SourceFileData
+    function build(UseCaseSchema $schema, string $namespace, string $outputDataName, string $outputPortName, string $outputPortNamespace): SourceFileData
     {
-        $name = $aName . 'Presenter';
+        $name = $schema->fullName() . 'Presenter';
 
         $clazz = new ClassMeta($name, $namespace);
 

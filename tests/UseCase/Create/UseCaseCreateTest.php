@@ -12,6 +12,7 @@ use nrslib\Clarc\UseCases\Commons\Ds\TypeAndName;
 use nrslib\Clarc\UseCases\UseCase\Create\UseCaseCreateInputData;
 use nrslib\Clarc\UseCases\UseCase\Create\UseCaseCreateInteractor;
 use nrslib\Clarc\UseCases\UseCase\Create\UseCaseCreateNamespaceData;
+use nrslib\Clarc\UseCases\UseCase\Create\UseCaseSchema;
 
 class UseCaseCreateTest extends \PHPUnit\Framework\TestCase
 {
@@ -33,7 +34,7 @@ class UseCaseCreateTest extends \PHPUnit\Framework\TestCase
 
         $inputData = new UseCaseCreateInputData(
             new UseCaseCreateNamespaceData($namespace . '\\A', $namespace . '\\B', $namespace . '\\C', $namespace . '\\D', $namespace . '\\E'),
-            "Test",
+            new UseCaseSchema('Test', 'MyAction'),
             [
                 new TypeAndName('string', 'inputStringField'),
             ],

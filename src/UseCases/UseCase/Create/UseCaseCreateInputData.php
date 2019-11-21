@@ -16,9 +16,9 @@ class UseCaseCreateInputData
     public $namespace;
 
     /**
-     * @var string
+     * @var UseCaseSchema
      */
-    public $name;
+    public $schema;
 
     /**
      * @var TypeAndName[]
@@ -33,7 +33,7 @@ class UseCaseCreateInputData
     /**
      * @var NameRule
      */
-    public $nameRule;
+    public $interactorNameRule;
 
     /**
      * @var CodingRule
@@ -43,7 +43,7 @@ class UseCaseCreateInputData
     /**
      * UseCaseCreateInputData constructor.
      * @param UseCaseCreateNamespaceData $namespace
-     * @param string $name
+     * @param UseCaseSchema $name
      * @param TypeAndName[] $inputDataFields
      * @param TypeAndName[] $outputDataFields
      * @param NameRule|null $nameRule
@@ -51,17 +51,17 @@ class UseCaseCreateInputData
      */
     public function __construct(
         UseCaseCreateNamespaceData $namespace,
-        string $name,
+        UseCaseSchema $schema,
         array $inputDataFields,
         array $outputDataFields,
         NameRule $nameRule = null,
         CodingRule $codingRule = null)
     {
-        $this->name = $name;
+        $this->schema = $schema;
         $this->namespace = $namespace;
         $this->inputDataFields = $inputDataFields;
         $this->outputDataFields = $outputDataFields;
-        $this->nameRule = !is_null($nameRule) ? $nameRule : new NameRule(false, 'Interactor');
+        $this->interactorNameRule = !is_null($nameRule) ? $nameRule : new NameRule(false, 'Interactor');
         $this->codingRule = !is_null($codingRule) ? $codingRule : CodingRule::default();
     }
 }

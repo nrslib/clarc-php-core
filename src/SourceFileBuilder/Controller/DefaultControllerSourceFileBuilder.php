@@ -7,6 +7,7 @@ namespace nrslib\Clarc\SourceFileBuilder\Controller;
 use nrslib\Cfg\ClassRenderer;
 use nrslib\Cfg\Meta\Classes\ClassMeta;
 use nrslib\Clarc\UseCases\Commons\Ds\SourceFileData;
+use nrslib\Clarc\UseCases\UseCase\Create\UseCaseSchema;
 
 class DefaultControllerSourceFileBuilder implements ControllerSourceFileBuilderInterface
 {
@@ -24,9 +25,9 @@ class DefaultControllerSourceFileBuilder implements ControllerSourceFileBuilderI
         $this->renderer = $renderer;
     }
 
-    function build(string $aName, string $namespace, string $inputPortName, string $inputPortNamespace): SourceFileData
+    function build(UseCaseSchema $schema, string $namespace, string $inputPortName, string $inputPortNamespace): SourceFileData
     {
-        $name = $aName . 'Controller';
+        $name = $schema->fullName() . 'Controller';
 
         $clazz = new ClassMeta($name, $namespace);
         $clazz->setupClass()
@@ -38,6 +39,7 @@ class DefaultControllerSourceFileBuilder implements ControllerSourceFileBuilderI
                 $constructorDefinition->addArgument('inputPort', $inputPortName)
                     ->addBody('$this->inputPort = $inputPort;');
             });
+
         $clazz->getMethodsSetting()
             ->addMethod('interact', function ($methodDefinition) {
                 $methodDefinition->addBody('// TODO: Implement interact() method.');

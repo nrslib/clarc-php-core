@@ -10,6 +10,7 @@ use nrslib\Cfg\Meta\Classes\ClassMeta;
 use nrslib\Cfg\Meta\Interfaces\InterfaceMeta;
 use nrslib\Cfg\Meta\Words\AccessLevel;
 use nrslib\Clarc\SourceFileBuilder\Controller\ControllerSourceFileBuilderInterface;
+use nrslib\Clarc\SourceFileBuilder\Controller\DefaultControllerSourceFileBuilder;
 use nrslib\Clarc\SourceFileBuilder\Presenter\PresenterSourceFileBuilderInterface;
 use nrslib\Clarc\UseCases\Commons\Ds\NameRule;
 use nrslib\Clarc\UseCases\Commons\Ds\SourceFileData;
@@ -41,19 +42,19 @@ class UseCaseCreateInteractor
      */
     private $presenterSourceFileBuilder;
 
-    public function __construct(UseCaseCreatePresenterInterface $presenter, ClassRenderer $classRenderer, InterfaceRenderer $interfaceRenderer, ControllerSourceFileBuilderInterface $controllerSourceFileBuilder, PresenterSourceFileBuilderInterface $presenterSourceFileBuilder)
+    public function __construct(UseCaseCreatePresenterInterface $presenter, ClassRenderer $classRenderer, InterfaceRenderer $interfaceRenderer, ControllerSourceFileBuilderInterface $controllerSourceFileBuilder = null, PresenterSourceFileBuilderInterface $presenterSourceFileBuilder = null)
     {
         $this->presenter = $presenter;
         $this->classRenderer = $classRenderer;
         $this->interfaceRenderer = $interfaceRenderer;
-        $this->controllerSourceFileBuilder = $controllerSourceFileBuilder;
-        $this->presenterSourceFileBuilder = $presenterSourceFileBuilder;
+        $this->controllerSourceFileBuilder = !is_null($controllerSourceFileBuilder) ? $controllerSourceFileBuilder : new DefaultControllerSourceFileBuilder($classRenderer);
+        $this->presenterSourceFileBuilder = !is_null($presenterSourceFileBuilder) ? $presenterSourceFileBuilder : new DefaultControllerSourceFileBuilder($classRenderer);
     }
 
     public function handle(UseCaseCreateInputData $inputData)
     {
         $controllerSourceFile = $this->controllerSourceFileBuilder->build(
-            $inputData->name,
+            $inputData->schema,
             $inputData->namespace->controllerNamespace,
             $this->getInputPortName($inputData),
             $inputData->namespace->inputPortNamespace);
@@ -63,7 +64,7 @@ class UseCaseCreateInteractor
         $outputPortSourceFile = $this->createOutputPortSourceFileData($inputData);
         $outputDataSourceFile = $this->createOutputDataSourceFileData($inputData);
         $presenterSourceFile = $this->presenterSourceFileBuilder->build(
-            $inputData->name,
+            $inputData->schema,
             $inputData->namespace->presenterNamespace,
             $this->getOutputDataName($inputData),
             $this->getOutputPortName($inputData),
@@ -177,7 +178,7 @@ class UseCaseCreateInteractor
     private function getInputPortName(UseCaseCreateInputData $inputData, bool $appendNamespace = false): string
     {
         return $this->adjustObjectName(
-            $this->applyNameRule($inputData->name . 'InputPort', $inputData->codingRule->interfaceRule),
+            $this->applyNameRule($inputData->schema->fullName() . 'InputPort', $inputData->codingRule->interfaceRule),
             $inputData->namespace->inputPortNamespace,
             $appendNamespace);
     }
@@ -185,7 +186,7 @@ class UseCaseCreateInteractor
     private function getInteractorName(UseCaseCreateInputData $inputData, bool $appendNamespace = false): string
     {
         return $this->adjustObjectName(
-            $this->applyNameRule($inputData->name, $inputData->nameRule),
+            $this->applyNameRule($inputData->schema->fullName(), $inputData->interactorNameRule),
             $inputData->namespace->interactorNamespace,
             $appendNamespace);
     }
@@ -193,7 +194,7 @@ class UseCaseCreateInteractor
     private function getInputDataName(UseCaseCreateInputData $inputData, bool $appendNamespace = false): string
     {
         return $this->adjustObjectName(
-            $inputData->name . 'InputData',
+            $inputData->schema->fullName() . 'InputData',
             $inputData->namespace->inputPortNamespace,
             $appendNamespace);
     }
@@ -201,7 +202,7 @@ class UseCaseCreateInteractor
     private function getOutputDataName(UseCaseCreateInputData $inputData, bool $appendNamespace = false): string
     {
         return $this->adjustObjectName(
-            $inputData->name . 'OutputData',
+            $inputData->schema->fullName() . 'OutputData',
             $inputData->namespace->outputPortNamespace,
             $appendNamespace);
     }
@@ -209,7 +210,7 @@ class UseCaseCreateInteractor
     private function getOutputPortName(UseCaseCreateInputData $inputData, bool $appendNamespace = false): string
     {
         return $this->adjustObjectName(
-            $this->applyNameRule($inputData->name . 'OutputPort', $inputData->codingRule->interfaceRule),
+            $this->applyNameRule($inputData->schema->fullName(). 'OutputPort', $inputData->codingRule->interfaceRule),
             $inputData->namespace->outputPortNamespace,
             $appendNamespace);
     }

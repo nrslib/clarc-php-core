@@ -20,27 +20,27 @@ class UseCaseCreateInputDataFacade
 
     public function getInputPortName(): string
     {
-        return $this->applyNameRule($this->original->name . 'InputPort', $this->original->codingRule->interfaceRule);
+        return $this->applyNameRule($this->original->schema . 'InputPort', $this->original->codingRule->interfaceRule);
     }
 
     public function getInteractorName(): string
     {
-        return $this->applyNameRule($this->original->name, $this->original->nameRule);
+        return $this->applyNameRule($this->original->schema, $this->original->interactorNameRule);
     }
 
     public function getInputDataName(): string
     {
-        return $this->original->name . 'InputData';
+        return $this->original->schema . 'InputData';
     }
 
     public function getOutputDataName(): string
     {
-        return $this->original->name . 'OutputData';
+        return $this->original->schema . 'OutputData';
     }
 
     public function getOutputPortName(): string
     {
-        return $this->applyNameRule($this->original->name . 'OutputPort', $this->original->codingRule->interfaceRule);
+        return $this->applyNameRule($this->original->schema . 'OutputPort', $this->original->codingRule->interfaceRule);
     }
 
     private function applyNameRule($name, NameRule $rule): string
