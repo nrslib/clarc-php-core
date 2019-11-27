@@ -43,7 +43,7 @@ class UseCaseCreateInputData
     /**
      * UseCaseCreateInputData constructor.
      * @param UseCaseCreateNamespaceData $namespace
-     * @param UseCaseSchema $name
+     * @param UseCaseSchema $schema
      * @param TypeAndName[] $inputDataFields
      * @param TypeAndName[] $outputDataFields
      * @param NameRule|null $nameRule

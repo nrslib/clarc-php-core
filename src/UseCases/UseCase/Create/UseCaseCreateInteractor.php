@@ -14,7 +14,12 @@ use nrslib\Clarc\SourceFileBuilder\Controller\DefaultControllerSourceFileBuilder
 use nrslib\Clarc\SourceFileBuilder\Presenter\PresenterSourceFileBuilderInterface;
 use nrslib\Clarc\UseCases\Commons\Ds\NameRule;
 use nrslib\Clarc\UseCases\Commons\Ds\SourceFileData;
+use nrslib\Clarc\UseCases\Commons\Ds\TypeAndName;
 
+/**
+ * Class UseCaseCreateInteractor
+ * @package nrslib\Clarc\UseCases\UseCase\Create
+ */
 class UseCaseCreateInteractor
 {
     /**
@@ -42,6 +47,14 @@ class UseCaseCreateInteractor
      */
     private $presenterSourceFileBuilder;
 
+    /**
+     * UseCaseCreateInteractor constructor.
+     * @param UseCaseCreatePresenterInterface $presenter
+     * @param ClassRenderer $classRenderer
+     * @param InterfaceRenderer $interfaceRenderer
+     * @param ControllerSourceFileBuilderInterface|null $controllerSourceFileBuilder
+     * @param PresenterSourceFileBuilderInterface|null $presenterSourceFileBuilder
+     */
     public function __construct(UseCaseCreatePresenterInterface $presenter, ClassRenderer $classRenderer, InterfaceRenderer $interfaceRenderer, ControllerSourceFileBuilderInterface $controllerSourceFileBuilder = null, PresenterSourceFileBuilderInterface $presenterSourceFileBuilder = null)
     {
         $this->presenter = $presenter;
@@ -51,6 +64,9 @@ class UseCaseCreateInteractor
         $this->presenterSourceFileBuilder = !is_null($presenterSourceFileBuilder) ? $presenterSourceFileBuilder : new DefaultControllerSourceFileBuilder($classRenderer);
     }
 
+    /**
+     * @param UseCaseCreateInputData $inputData
+     */
     public function handle(UseCaseCreateInputData $inputData)
     {
         $controllerSourceFile = $this->controllerSourceFileBuilder->build(
@@ -69,12 +85,25 @@ class UseCaseCreateInteractor
             $this->getOutputDataName($inputData),
             $this->getOutputPortName($inputData),
             $inputData->namespace->outputPortNamespace);
+        $viewModelSourceFile = $this->createViewModelSourceFile($inputData, $inputData->outputDataFields);
 
-        $outputData = new UseCaseCreateOutputData($controllerSourceFile, $inputPortSourceFile, $interactorData, $inputDataSourceFile, $outputPortSourceFile, $outputDataSourceFile, $presenterSourceFile);
+        $outputData = new UseCaseCreateOutputData(
+            $controllerSourceFile,
+            $inputPortSourceFile,
+            $interactorData,
+            $inputDataSourceFile,
+            $outputPortSourceFile,
+            $outputDataSourceFile,
+            $presenterSourceFile,
+            $viewModelSourceFile);
 
         $this->presenter->output($outputData);
     }
 
+    /**
+     * @param UseCaseCreateInputData $inputData
+     * @return SourceFileData
+     */
     private function createInputPortSourceFileData(UseCaseCreateInputData $inputData)
     {
         $name = $this->getInputPortName($inputData);
@@ -94,6 +123,10 @@ class UseCaseCreateInteractor
         return new SourceFileData($name, $contents);
     }
 
+    /**
+     * @param UseCaseCreateInputData $inputData
+     * @return SourceFileData
+     */
     private function createInteractorSourceFileData(UseCaseCreateInputData $inputData): SourceFileData
     {
         $interactorName = $this->getInteractorName($inputData);
@@ -124,6 +157,10 @@ class UseCaseCreateInteractor
         return new SourceFileData($interactorName, $contents);
     }
 
+    /**
+     * @param UseCaseCreateInputData $inputData
+     * @return SourceFileData
+     */
     private function createInputDataSourceFileData(UseCaseCreateInputData $inputData): SourceFileData
     {
         $inputDataName = $this->getInputDataName($inputData);
@@ -131,6 +168,10 @@ class UseCaseCreateInteractor
         return $this->createDataStructureSourceFileData($inputDataName, $inputData->namespace->inputPortNamespace, $inputData->inputDataFields);
     }
 
+    /**
+     * @param UseCaseCreateInputData $inputData
+     * @return SourceFileData
+     */
     public function createOutputPortSourceFileData(UseCaseCreateInputData $inputData): SourceFileData
     {
         $name = $this->getOutputPortName($inputData);
@@ -147,6 +188,10 @@ class UseCaseCreateInteractor
         return new SourceFileData($name, $contents);
     }
 
+    /**
+     * @param UseCaseCreateInputData $inputData
+     * @return SourceFileData
+     */
     public function createOutputDataSourceFileData(UseCaseCreateInputData $inputData): SourceFileData
     {
         $outputDataName = $this->getOutputDataName($inputData);
@@ -154,19 +199,44 @@ class UseCaseCreateInteractor
         return $this->createDataStructureSourceFileData($outputDataName, $inputData->namespace->outputPortNamespace, $inputData->outputDataFields);
     }
 
-    public function createDataStructureSourceFileData(string $className, string $namespace, array $fields): SourceFileData
+    /**
+     * @param string $className
+     * @param string $namespace
+     * @param TypeAndName[] $fields
+     * @param callable|null $setupConstructor
+     * @return SourceFileData
+     */
+    private function createDataStructureSourceFileData(string $className, string $namespace, array $fields, callable $classPredicate = null): SourceFileData
     {
         $clazz = new ClassMeta($className, $namespace);
+
+        $classSetup = $clazz->setupClass();
+
+        if (is_null($classPredicate)) {
+            $classSetup->setConstructor(function ($definition) use ($fields) {
+                foreach ($fields as $field) {
+                    $definition->addArgument($field->name, $field->type)
+                        ->addBody($this->assignFieldCode($field->name));
+                }
+            });
+        } else {
+            $classPredicate($classSetup);
+        }
 
         $fieldSetup = $clazz->setupFields();
         $methodSetup = $clazz->setupMethods();
         foreach ($fields as $field) {
+            if ($field->hasNamespace()) {
+                $classSetup->addUse($field->completeType());
+            }
+
             $fieldName = $field->name;
             $fieldSetup->addField($field->name, $field->type);
             $getterName = 'get' . ucwords($fieldName);
             $methodSetup->addMethod($getterName, function ($methodDefinition) use ($field, $fieldName) {
                 $methodDefinition->setReturnType($field->type)
-                    ->addBody('return $this->' . $fieldName . ';');
+                    ->addBody('return $this->' . $fieldName . ';')
+                    ->setAccessLevel(AccessLevel::public());
             });
         }
 
@@ -175,6 +245,33 @@ class UseCaseCreateInteractor
         return new SourceFileData($className, $contents);
     }
 
+    /**
+     * @param UseCaseCreateInputData $inputData
+     * @param TypeAndName[] $fields
+     * @return SourceFileData
+     */
+    private function createViewModelSourceFile(UseCaseCreateInputData $inputData, array $fields): SourceFileData
+    {
+        return $this->createDataStructureSourceFileData(
+            $inputData->schema->fullName() . 'ViewModel',
+            $inputData->namespace->viewModelNamespace,
+            $fields,
+            function ($classSetup) use ($inputData, $fields) {
+                $classSetup->addUse($inputData->namespace->outputPortNamespace . '\\' . $this->getOutputDataName($inputData));
+                $classSetup->setConstructor(function($constructorDefinition) use ($inputData, $fields) {
+                    $constructorDefinition->addArgument('source', $this->getOutputDataName($inputData));
+                    foreach ($fields as $field) {
+                        $constructorDefinition->addBody($this->assignFieldCode($field->name, 'source->get' . ucfirst($field->name) . '()'));
+                    }
+                });
+            });
+    }
+
+    /**
+     * @param UseCaseCreateInputData $inputData
+     * @param bool $appendNamespace
+     * @return string
+     */
     private function getInputPortName(UseCaseCreateInputData $inputData, bool $appendNamespace = false): string
     {
         return $this->adjustObjectName(
@@ -183,6 +280,11 @@ class UseCaseCreateInteractor
             $appendNamespace);
     }
 
+    /**
+     * @param UseCaseCreateInputData $inputData
+     * @param bool $appendNamespace
+     * @return string
+     */
     private function getInteractorName(UseCaseCreateInputData $inputData, bool $appendNamespace = false): string
     {
         return $this->adjustObjectName(
@@ -191,6 +293,11 @@ class UseCaseCreateInteractor
             $appendNamespace);
     }
 
+    /**
+     * @param UseCaseCreateInputData $inputData
+     * @param bool $appendNamespace
+     * @return string
+     */
     private function getInputDataName(UseCaseCreateInputData $inputData, bool $appendNamespace = false): string
     {
         return $this->adjustObjectName(
@@ -199,6 +306,11 @@ class UseCaseCreateInteractor
             $appendNamespace);
     }
 
+    /**
+     * @param UseCaseCreateInputData $inputData
+     * @param bool $appendNamespace
+     * @return string
+     */
     private function getOutputDataName(UseCaseCreateInputData $inputData, bool $appendNamespace = false): string
     {
         return $this->adjustObjectName(
@@ -207,6 +319,11 @@ class UseCaseCreateInteractor
             $appendNamespace);
     }
 
+    /**
+     * @param UseCaseCreateInputData $inputData
+     * @param bool $appendNamespace
+     * @return string
+     */
     private function getOutputPortName(UseCaseCreateInputData $inputData, bool $appendNamespace = false): string
     {
         return $this->adjustObjectName(
@@ -215,6 +332,12 @@ class UseCaseCreateInteractor
             $appendNamespace);
     }
 
+    /**
+     * @param string $name
+     * @param string $prefix
+     * @param bool $add
+     * @return string
+     */
     private function adjustObjectName(string $name, string $prefix, bool $add)
     {
         if ($add) {
@@ -224,12 +347,26 @@ class UseCaseCreateInteractor
         }
     }
 
+    /**
+     * @param $name
+     * @param NameRule $rule
+     * @return string
+     */
     private function applyNameRule($name, NameRule $rule): string
     {
         if ($rule->isPrefix) {
             return $rule->text . $name;
         } else {
             return $name . $rule->text;
+        }
+    }
+
+    private function assignFieldCode(string $fieldName, string $argument = null): string
+    {
+        if (is_null($argument)) {
+            return '$this->' . $fieldName . ' = $' . $fieldName . ';';
+        } else {
+            return '$this->' . $fieldName . ' = $' . $argument . ';';
         }
     }
 }

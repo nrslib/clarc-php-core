@@ -33,7 +33,7 @@ class UseCaseCreateTest extends \PHPUnit\Framework\TestCase
         $namespace = 'nrslib\\Test';
 
         $inputData = new UseCaseCreateInputData(
-            new UseCaseCreateNamespaceData($namespace . '\\A', $namespace . '\\B', $namespace . '\\C', $namespace . '\\D', $namespace . '\\E'),
+            new UseCaseCreateNamespaceData($namespace . '\\A', $namespace . '\\B', $namespace . '\\C', $namespace . '\\D', $namespace . '\\E', $namespace . '\\F'),
             new UseCaseSchema('Test', 'MyAction'),
             [
                 new TypeAndName('string', 'inputStringField'),
@@ -45,20 +45,22 @@ class UseCaseCreateTest extends \PHPUnit\Framework\TestCase
         $interactor->handle($inputData);
         $outputData = $presenter->outputData;
 
-        file_put_contents('c:\\test\\TestController.php', $outputData->getControllerSourceFile()->getContents());
-        file_put_contents('c:\\test\\TestInputPortInterface.php', $outputData->getInputPortSourceFile()->getContents());
-        file_put_contents('c:\\test\\TestInteractor.php', $outputData->getInteractorSourceFile()->getContents());
-        file_put_contents('c:\\test\\TestInputData.php', $outputData->getInputDataSourceFile()->getContents());
-        file_put_contents('c:\\test\\TestOutputPortInterface.php', $outputData->getOutputPortSourceFile()->getContents());
-        file_put_contents('c:\\test\\TestOutputData.php', $outputData->getOutputDataSourceFile()->getContents());
-        file_put_contents('c:\\test\\TestPresenter.php', $outputData->getPresenterSourceFile()->getContents());
+//        file_put_contents('c:\\test\\TestController.php', $outputData->getControllerSourceFile()->getContents());
+//        file_put_contents('c:\\test\\TestInputPortInterface.php', $outputData->getInputPortSourceFile()->getContents());
+//        file_put_contents('c:\\test\\TestInteractor.php', $outputData->getInteractorSourceFile()->getContents());
+//        file_put_contents('c:\\test\\TestInputData.php', $outputData->getInputDataSourceFile()->getContents());
+//        file_put_contents('c:\\test\\TestOutputPortInterface.php', $outputData->getOutputPortSourceFile()->getContents());
+//        file_put_contents('c:\\test\\TestOutputData.php', $outputData->getOutputDataSourceFile()->getContents());
+//        file_put_contents('c:\\test\\TestPresenter.php', $outputData->getPresenterSourceFile()->getContents());
+//        file_put_contents('c:\\test\\TestViewModel.php', $outputData->getViewModelSourceFile()->getContents())
 
-        echo $outputData->getControllerSourceFile()->getContents();
-        echo $outputData->getInputPortSourceFile()->getContents();
-        echo $outputData->getInteractorSourceFile()->getContents();
-        echo $outputData->getInputDataSourceFile()->getContents();
-        echo $outputData->getOutputPortSourceFile()->getContents();
-        echo $outputData->getOutputDataSourceFile()->getContents();
-        echo $outputData->getPresenterSourceFile()->getContents();
+//        echo $outputData->getControllerSourceFile()->getContents();
+//        echo $outputData->getInputPortSourceFile()->getContents();
+//        echo $outputData->getInteractorSourceFile()->getContents();
+//        echo $outputData->getInputDataSourceFile()->getContents();
+//        echo $outputData->getOutputPortSourceFile()->getContents();
+//        echo $outputData->getOutputDataSourceFile()->getContents();
+//        echo $outputData->getPresenterSourceFile()->getContents();
+//        echo $outputData->getViewModelSourceFile()->getContents();
     }
 }

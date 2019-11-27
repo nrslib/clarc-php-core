@@ -30,6 +30,10 @@ class UseCaseCreateNamespaceData
      * @var string
      */
     public $presenterNamespace;
+    /**
+     * @var string
+     */
+    public $viewModelNamespace;
 
     /**
      * UseCaseCreateNameSpaceData constructor.
@@ -38,13 +42,15 @@ class UseCaseCreateNamespaceData
      * @param string $interactorNamespace
      * @param string $outputPortNamespace
      * @param string $presenterNamespace
+     * @param string $viewModelNamespace
      */
-    public function __construct(string $controllerNamespace, string $inputPortNamespace, string $interactorNamespace, string $outputPortNamespace, string $presenterNamespace)
+    public function __construct(string $controllerNamespace, string $inputPortNamespace, string $interactorNamespace, string $outputPortNamespace, string $presenterNamespace, string $viewModelNamespace)
     {
         $this->controllerNamespace = $controllerNamespace;
         $this->inputPortNamespace = $inputPortNamespace;
         $this->interactorNamespace = $interactorNamespace;
         $this->outputPortNamespace = $outputPortNamespace;
         $this->presenterNamespace = $presenterNamespace;
+        $this->viewModelNamespace = $viewModelNamespace;
     }
 }

@@ -48,6 +48,11 @@ class UseCaseCreateOutputData
     private $presenterSourceFile;
 
     /**
+     * @var SourceFileData
+     */
+    private $viewModelSourceFile;
+
+    /**
      * UseCaseCreateOutputData constructor.
      * @param SourceFileData $controllerSourceFile
      * @param SourceFileData $inputPortSourceFile
@@ -64,7 +69,8 @@ class UseCaseCreateOutputData
         SourceFileData $inputDataSourceFile,
         SourceFileData $outputPortSourceFile,
         SourceFileData $outputDataSourceFile,
-        SourceFileData $presenterSourceFile
+        SourceFileData $presenterSourceFile,
+        SourceFileData $viewModelSourceFile
     )
     {
         $this->controllerSourceFile = $controllerSourceFile;
@@ -74,6 +80,7 @@ class UseCaseCreateOutputData
         $this->outputPortSourceFile = $outputPortSourceFile;
         $this->outputDataSourceFile = $outputDataSourceFile;
         $this->presenterSourceFile = $presenterSourceFile;
+        $this->viewModelSourceFile = $viewModelSourceFile;
     }
 
     /**
@@ -130,5 +137,13 @@ class UseCaseCreateOutputData
     public function getPresenterSourceFile(): SourceFileData
     {
         return $this->presenterSourceFile;
+    }
+
+    /**
+     * @return SourceFileData
+     */
+    public function getViewModelSourceFile(): SourceFileData
+    {
+        return $this->viewModelSourceFile;
     }
 }

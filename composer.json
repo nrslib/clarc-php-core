@@ -2,7 +2,7 @@
     "name": "nrslib/clarc-php-core",
     "require": {
         "php": "^7.2",
-        "nrslib/cfg": "^0.1.7"
+        "nrslib/cfg": "0.*"
     },
     "require-dev": {
         "phpunit/phpunit": "^8.0"
