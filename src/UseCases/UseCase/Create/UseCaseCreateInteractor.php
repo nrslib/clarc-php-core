@@ -257,7 +257,7 @@ class UseCaseCreateInteractor
             $inputData->namespace->viewModelNamespace,
             $fields,
             function ($classSetup) use ($inputData, $fields) {
-                $classSetup->addUse($inputData->namespace->outputPortNamespace . '\\' . $this->getOutputDataName($inputData));
+                $classSetup->addUse($inputData->namespace->viewModelNamespace . '\\' . $this->getOutputDataName($inputData));
                 $classSetup->setConstructor(function($constructorDefinition) use ($inputData, $fields) {
                     $constructorDefinition->addArgument('source', $this->getOutputDataName($inputData));
                     foreach ($fields as $field) {
